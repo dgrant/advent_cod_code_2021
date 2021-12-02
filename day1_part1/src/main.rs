@@ -3,30 +3,17 @@ use std::io::prelude::*;
 use std::io::BufReader;
 use std::path::Path;
 
-fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
-    let file = File::open(filename).expect("no such file");
-    let buf = BufReader::new(file);
-    buf.lines()
-        .map(|l| l.expect("Could not parse line"))
-        .collect()
-}
-
-fn lines_from_file_as_int(lines_str: Vec<String>) -> Vec<u32> {
-    let mut lines_int: Vec<u32> = Vec::new();
-
-    for line in lines_str {
-        let line_as_int = line.parse().unwrap();
-        lines_int.push(line_as_int);
-    }
-    lines_int
+fn lines_from_file_as_int(filename: impl AsRef<Path>) -> impl Iterator<Item=u32> {
+    BufReader::new(File::open(filename).expect("no such file")).lines()
+        .map(|l| l.expect("Could not parse line").parse().unwrap())
 }
 
 fn main() {
-    let values = lines_from_file_as_int(lines_from_file(
+    let mut values = lines_from_file_as_int(
         "/home/dgrant/git/advent_of_code_2021/day1_part1/data.txt",
-    ));
+    );
 
-    let mut prev = values[0];
+    let mut prev = values.next().expect("Oops, you have no values");
     let mut count = 0;
     for value in values {
         if value > prev {
